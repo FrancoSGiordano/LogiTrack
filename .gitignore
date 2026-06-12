@@ -1,0 +1,59 @@
+# ==========================================
+# BACKEND (.NET / C# / Visual Studio)
+# ==========================================
+# Carpetas de compilación (La basura más pesada)
+[Bb]in/
+[Oo]bj/
+
+# Archivos y carpetas de Visual Studio / Rider
+.vs/
+*.user
+*.suo
+*.userprefs
+*.ide
+*.sln.docstates
+
+# Archivos de configuración locales (Para no subir contraseñas de BD a GitHub)
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+
+# ==========================================
+# FRONTEND (React / Node.js)
+# ==========================================
+# Dependencias (¡NUNCA subir node_modules!)
+node_modules/
+/.pnp
+.pnp.js
+
+# Carpetas de construcción/empaquetado
+dist/
+build/
+out/
+
+# Archivos de entorno (Contraseñas y variables secretas del front)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs de errores de npm o yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# ==========================================
+# SISTEMA OPERATIVO Y EDITORES (Generales)
+# ==========================================
+# Archivos basura de Mac y Windows
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Configuraciones locales de VS Code (Opcional, pero recomendado)
+.vscode/

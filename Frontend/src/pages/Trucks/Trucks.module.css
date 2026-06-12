@@ -1,0 +1,176 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.addButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.addButton:hover{
+    background-color: #2563eb;
+}
+
+.tableContainer {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 600px;
+}
+
+.table th {
+    background-color: #0f172a;
+    color: #94a3b8;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    padding: 16px;
+    border-bottom: 1px solid #334155;
+}
+
+.table td {
+    padding: 16px;
+    border-bottom: 1px solid #334155;
+    color: #f8fafc;
+    font-size: 0.95rem;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover{
+    background-color: #334155;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.badgeAvailable { background-color: rgba(16, 185, 129, 0.15); color: #10b981; }
+.badgeOnTrip { background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.badgeMaintenance { background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.badgeOutOfService {
+    background-color: #7f1d1d; 
+    color: #fca5a5;            
+}
+
+.actionButtons {
+    display: flex;
+    gap: 12px;
+}
+
+.iconBtn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconBtn:hover {
+    color: #f8fafc;
+}
+
+.iconBtnDelete:hover {
+    color: #ef4444;
+}
+
+
+.statusSelect {
+    cursor: pointer;
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    padding-right: 12px; 
+}
+
+.statusSelect:hover {
+    filter: brightness(1.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.statusSelect:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+.statusSelect option {
+    background-color: #1e293b;
+    color: white;
+    font-weight: normal;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .addButton {
+    width: 100%; 
+    justify-content: center;
+  }
+
+  .tableContainer {
+    border-radius: 8px; 
+  }
+
+  .table th, 
+  .table td {
+    padding: 12px 10px; 
+    font-size: 0.85rem; 
+  }
+
+  .badge {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+  }
+}

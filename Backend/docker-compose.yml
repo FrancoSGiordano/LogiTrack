@@ -1,0 +1,20 @@
+services:
+  fleet.api:
+    image: ${DOCKER_REGISTRY-}fleetapi
+    build:
+      context: .
+      dockerfile: Services/Fleet/Fleet.API/Dockerfile
+
+  tracking.api:
+    image: ${DOCKER_REGISTRY-}trackingapi
+    build:
+      context: .
+      dockerfile: Services/Tracking/Tracking.API/Dockerfile
+
+
+  tracking.worker:
+    image: ${DOCKER_REGISTRY-}trackingworker
+    build:
+      context: .
+      dockerfile: Services/Tracking/Tracking.Worker/Dockerfile
+

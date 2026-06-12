@@ -1,0 +1,285 @@
+/* 1. CONTENEDOR PRINCIPAL */
+.container {
+  display: flex;
+  gap: 24px;
+  padding: 16px; /* Separación de los bordes de la pantalla */
+  height: 100vh; /* Ocupa el 100% de la ventana exacta */
+  box-sizing: border-box;
+  background-color: #0f172a; /* Color de fondo general */
+}
+
+/* 2. PANEL LATERAL */
+.statsPanel {
+  width: 320px;
+  flex-shrink: 0; /* Evita que el mapa aplaste al panel en pantallas medianas */
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Para que la lista de camiones scrollee por dentro */
+}
+
+.panelTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+/* Botón de Seguimiento */
+.trackButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trackActive { background-color: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; }
+.trackInactive { background-color: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid #475569; }
+.trackButton:hover { filter: brightness(1.2); }
+.trackButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Cajas de Estadísticas */
+.statBox {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statValue {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: #60a5fa;
+  margin: 0;
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.pingDot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* 3. LISTA DE UNIDADES (Responsiva) */
+.selectTruckContainer {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Ocupa el alto sobrante del panel */
+    min-height: 0; /* Vital en flexbox para que no desborde hacia abajo */
+    padding: 15px;
+    background-color: #0f172a;
+    border-radius: 12px;
+    border: 1px solid #334155;
+}
+
+.selectTruckText {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    margin-top: 0;
+}
+
+.truckListWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    flex: 1; /* El scroll interno automático */
+    padding-right: 4px;
+}
+
+/* Scrollbar moderno */
+.truckListWrapper::-webkit-scrollbar { width: 6px; }
+.truckListWrapper::-webkit-scrollbar-track { background: transparent; }
+.truckListWrapper::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+.truckListWrapper::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+.truckListItem {
+    padding: 10px;
+    background-color: #1e293b;
+    border: 1px solid #3b82f6;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* Que no se aplasten los botones */
+}
+
+.truckListItem:hover { background-color: #334155; }
+.truckListItemSelected { background-color: #0f172a; border-color: #10b981; }
+
+.truckListStatus { color: #64748b; font-size: 0.8rem; }
+.truckListStatusSelected { color: #10b981; font-size: 0.8rem; font-weight: bold; }
+
+/* 4. MAPA */
+.mapWrapper {
+  flex: 1;
+  border-radius: 16px;
+  border: 1px solid #334155;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* =========================================
+   NUEVOS ESTILOS: BUSCADOR Y ESTADO DE SALUD
+   ========================================= */
+
+/* Buscador Responsivo */
+.searchInput {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: white;
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  box-sizing: border-box; /* Vital para que no desborde el panel */
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.searchInput::placeholder {
+  color: #64748b;
+}
+
+/* Modificación de la tarjeta del camión (Dos líneas) */
+.truckItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.truckItemTitle {
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.truckItemDetails {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Indicadores de Salud (Health Checks) */
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dotActive { 
+  background-color: #10b981; 
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.dotDelayed { 
+  background-color: #f59e0b; /* Amarillo/Naranja */
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+}
+
+.dotOffline { 
+  background-color: #ef4444; /* Rojo */
+}
+
+/* =========================================
+   MEDIA QUERIES (TABLETS Y MOVILES)
+   ========================================= */
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column-reverse; /* Mapa arriba, controles abajo */
+    height: auto; 
+    min-height: 100vh; /* Permitimos scrollear toda la página */
+    overflow-y: auto;
+  }
+  
+  .statsPanel {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible; /* Dejamos que crezca libremente */
+  }
+
+  .selectTruckContainer {
+    max-height: 400px; /* Límite de la lista para celulares */
+  }
+
+  .mapWrapper {
+    height: 50vh; /* El mapa ocupa la mitad de la pantalla de tu teléfono */
+    min-height: 350px;
+    flex: none;
+  }
+}
+
+/* Pantallas súper pequeñas */
+@media (max-width: 600px) {
+    .container { padding: 8px; gap: 12px; }
+    .statsPanel { padding: 16px; gap: 16px; }
+}

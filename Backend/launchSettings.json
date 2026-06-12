@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "fleet.api": "StartDebugging",
+        "tracking.api": "StartDebugging",
+        "tracking.worker": "StartDebugging"
+      }
+    }
+  }
+}

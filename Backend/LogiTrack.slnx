@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/BuildingBlocks/">
+    <Project Path="BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj" Id="4a50beb8-0309-4f5b-8698-dc92fbc9024c" />
+  </Folder>
+  <Folder Name="/Services/" />
+  <Folder Name="/Services/Fleet/">
+    <Project Path="Services/Fleet/Fleet.API/Fleet.API.csproj" Id="6e1135f5-ee9e-48a0-8ba3-15bde6e37415" />
+    <Project Path="Services/Fleet/Fleet.Application/Fleet.Application.csproj" Id="7f21e7c7-15af-49fd-8e66-3ed174e2f25c" />
+    <Project Path="Services/Fleet/Fleet.Domain/Fleet.Domain.csproj" Id="e75ff1ea-cd6f-46e2-a23c-07723f148ade" />
+    <Project Path="Services/Fleet/Fleet.Infrastructure/Fleet.Infrastructure.csproj" Id="848eb989-1662-423d-b4ea-857b7018ba84" />
+  </Folder>
+  <Folder Name="/Services/Tracking/">
+    <Project Path="Services/Tracking/Tracking.API/Tracking.API.csproj" Id="785d0361-026e-42a0-a3fd-f893d48275fb" />
+    <Project Path="Services/Tracking/Tracking.Application/Tracking.Application.csproj" Id="05c7fc36-9810-4d92-9137-8c44e9e44125" />
+    <Project Path="Services/Tracking/Tracking.Core/Tracking.Core.csproj" Id="211ece39-f7de-4c30-907d-0ad44a594d75" />
+    <Project Path="Services/Tracking/Tracking.Infrastructure/Tracking.Infrastructure.csproj" Id="8cce8242-7765-406f-afb3-6e4b5ae7963b" />
+    <Project Path="Services/Tracking/Tracking.Worker/Tracking.Worker.csproj" Id="fe52d03d-2d11-4d56-b960-e9797e7cc7fa" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

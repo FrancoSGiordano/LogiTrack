@@ -1,0 +1,113 @@
+services:
+  fleet.api:
+    container_name: fleet.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8000
+      - ASPNETCORE_HTTPS_PORTS=8001
+      - ASPNETCORE_HTTPS_PORT=5001 
+      - ConnectionStrings__FleetDbConnection=Host=fleetdb;Database=fleet_db;Username=admin;Password=admin
+    ports:
+      - "5000:8000"
+      - "5001:8001"
+    depends_on:
+      - fleetdb
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ./.certs:/https/ 
+ 
+  tracking.api:
+    container_name: tracking.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8050
+      - ASPNETCORE_HTTPS_PORTS=8051
+      - RABBITMQ_HOST=rabbitmq
+      - ConnectionStrings__TrackingDbConnection=Host=trackingdb;Database=tracking_db;Username=admin;Password=admin
+      - REDIS_CONNECTION=redis:6379 
+    depends_on:
+      - rabbitmq
+      - trackingdb
+    ports:
+      - "5050:8050"
+      - "5051:8051"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  tracking.worker:
+    container_name: tracking-worker
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ConnectionStrings__TrackingDbConnection=Host=trackingdb;Database=tracking_db;Username=admin;Password=admin
+      - RABBITMQ_HOST=rabbitmq 
+      - REDIS_CONNECTION=redis:6379
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    depends_on:
+     trackingdb:
+        condition: service_started
+     rabbitmq:
+        condition: service_healthy
+     redis:
+        condition: service_started
+  
+  fleetdb:
+    image: postgres:15-alpine
+    container_name: fleetdb
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=fleet_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - fleet_db_data:/var/lib/postgresql/data
+    restart: always
+
+  trackingdb:
+    image: postgres:15-alpine
+    container_name: trackingdb
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=tracking_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - tracking_db_data:/var/lib/postgresql/data
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    ports:
+      - "5672:5672"
+      - "15672:15672" 
+    restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 15s
+      retries: 5
+  
+  redis:
+    image: redis:alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    restart: always
+  
+volumes:
+  fleet_db_data:
+  tracking_db_data:
+
