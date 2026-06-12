@@ -1,8 +1,8 @@
-# 🚛 LogiTrack - Sistema de Telemetría y Gestión de Flotas
+# LogiTrack - Sistema de Telemetría y Gestión de Flotas
 
 LogiTrack es una plataforma basada en microservicios diseñada para gestionar flotas de camiones y procesar telemetría (GPS) en tiempo real, detectando desvíos de ruta mediante cálculos geométricos avanzados.
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 **Backend & Arquitectura**
 * **.NET 10 (C#)** - Framework principal.
