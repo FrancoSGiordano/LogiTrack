@@ -1,73 +1,53 @@
-# React + TypeScript + Vite
+# LogiTrack - Sistema de Telemetría y Gestión de Flotas
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+LogiTrack es una plataforma basada en microservicios diseñada para gestionar flotas de camiones y procesar telemetría (GPS) en tiempo real, detectando desvíos de ruta mediante cálculos geométricos avanzados.
 
-Currently, two official plugins are available:
+## Tecnologías Utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Backend & Arquitectura**
+* **.NET 10 (C#)** - Framework principal.
+* **Clean Architecture** - Separación estricta en capas (Core, Application, Infrastructure, Presentation/Worker).
+* **CQRS (Command Query Responsibility Segregation)** - Para la gestión de estados e histórico en las APIs.
+* **Entity Framework Core** - ORM con PostgreSQL.
 
-## React Compiler
+**Frontend**
+* **React + TypeScript** - Interfaz de usuario estricta y altamente tipada para el mapa y tableros.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Infraestructura & Datos**
+* **PostgreSQL** - Base de datos relacional principal para persistencia de datos históricos y de negocio.
+* **Redis** - Caché distribuido ultrarrápido (para rutas activas) y sistema de mensajería interna Pub/Sub.
+* **RabbitMQ** - Message broker encargado de la ingesta masiva, asíncrona y segura de coordenadas.
+* **OSRM (Open Source Routing Machine)** - API de mapas para obtener las polilíneas reales de las calles.
 
-## Expanding the ESLint configuration
+**Testing & Simulación**
+* **Python** - Scripts de simulación que inyectan pings de coordenadas falsas directamente a RabbitMQ para someter al sistema a pruebas de estrés y validar el algoritmo de desvíos.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Estructura y Responsabilidad de los Microservicios (Monorepo)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+El ecosistema está dividido en componentes independientes y desacoplados que se comunican entre sí de forma eficiente:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 1. Fleet.API
+Encargado de la gestión administrativa de la flota (CRUD de camiones, choferes y estados de los viajes).
+* **Flujo Clave**: Al cambiar el estado de un viaje a `INPROGRESS`, consulta la API de OSRM para descargar la polilínea topológica exacta (GeoJSON) de las calles del recorrido planeado y la inyecta inmediatamente en **Redis** con un tiempo de expiración controlado.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Tracking.Worker
+Un *BackgroundService* (demonio en segundo plano) de alta disponibilidad dedicado exclusivamente a la ingesta masiva de datos.
+* **Flujo Clave**: Escucha de forma asíncrona la cola `truck_pings` en **RabbitMQ**. Por cada ping recibido, rescata la ruta teórica desde **Redis** y ejecuta el algoritmo de desvío. Finalmente, persiste la coordenada en el historial de **PostgreSQL**.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 3. Tracking.API
+La puerta de entrada para la lectura y visualización de la telemetría.
+* **Flujo Clave**: Expone los endpoints de consulta para ver el historial de posiciones de un camión. Además, actúa como un puente de comunicación en tiempo real: se suscribe al canal Pub/Sub de **Redis** (donde el Worker avisa que procesó un ping) y utiliza **SignalR** (WebSockets) para empujar instantáneamente las nuevas coordenadas y alertas de desvío hacia el mapa de **React**.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 4. Tracking.Core (Librería de Dominio)
+El cerebro matemático del sistema, completamente aislado de bases de datos o frameworks externos.
+* **Flujo Clave**: Aloja al `GeoCalculator`, que procesa geometría esférica en base a la fórmula de *Haversine*. Transforma el ping del GPS en una proyección perpendicular contra los segmentos de la polilínea real del mapa (*Cross-Track distance*), determinando con precisión de metros si el camión sigue en su ruta o se desvió. (Deben modificarse las operaciones para calcular adecuadamente los desvios.)
+
+---
+
+## Próximos Pasos
+
+* [ ] Levantar el *Hub* de **SignalR** en `Tracking.API` conectado al Pub/Sub de Redis para enviar los datos vivos a la UI.
+* [ ] Conectar SignalR con el frontend para dibujar en tiempo real el recorrido de los camiones en el mapa y llevar a cabo el monitoreo.
+* [ ] Implementar el servicio de **Inteligencia Artificial (Python/FastAPI)** para predecir tiempos de llegada (ETA) y detectar comportamientos anómalos en los conductores basándose en el historial de telemetría.
