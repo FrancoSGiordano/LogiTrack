@@ -23,7 +23,6 @@ namespace Fleet.Infrastructure
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = configuration["REDIS_CONNECTION"] ?? "localhost:6379";
-                options.InstanceName = "Fleet_";
             });
 
             return services;

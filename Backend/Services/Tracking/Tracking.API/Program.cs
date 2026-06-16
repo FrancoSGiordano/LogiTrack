@@ -3,6 +3,8 @@ using Microsoft.Extensions.Caching.Distributed;
 using RabbitMQ.Client;
 using StackExchange.Redis;
 using System.Text.Json;
+using Tracking.API;
+using Tracking.API.Hubs;
 using Tracking.Application.DTOs;
 using Tracking.Infrastructure.Persistance;
 
@@ -22,7 +24,6 @@ builder.Services.AddDbContext<TrackingDbContext>(options =>
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["REDIS_CONNECTION"] ?? "localhost:6379";
-    options.InstanceName = "LogiTrack_";
 });
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -45,6 +46,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddSignalR();
+
+builder.Services.AddHostedService<RedisSubscribeWorker>();
 
 var app = builder.Build();
 
@@ -79,6 +82,8 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tracking API v1");
     options.RoutePrefix = string.Empty;
 });
+
+app.MapHub<TrackingHub>("/hubs/tracking");
 
 app.Run();
 

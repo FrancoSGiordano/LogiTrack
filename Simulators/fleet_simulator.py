@@ -25,7 +25,7 @@ def get_real_route(start_coord, end_coord):
 
     return route_points
 
-def simulate_truck(truck_id, start_city, end_city, duration_minutes=15):
+def simulate_truck(trip_id, truck_id, start_city, end_city, simulate_deviation=False):
     credentials = pika.PlainCredentials('admin', 'admin')
     parameters = pika.ConnectionParameters(
         host='localhost',
@@ -40,16 +40,23 @@ def simulate_truck(truck_id, start_city, end_city, duration_minutes=15):
 
     points = get_real_route(start_city, end_city)
 
-    step = 10
+    step = 20
     fast_points = points[::step]
 
-    for lat, lon in fast_points:
+    total_points = len(fast_points)
+
+    for index, (lat, lon) in enumerate(fast_points):
+
+        if simulate_deviation and index > (total_points / 2):
+            lat += 2.0
+            lon += 2.0
         
         ping = {
+            "TripId": trip_id,
             "TruckId": truck_id,
             "Latitude": lat,
             "Longitude": lon,
-            "Timestamp": datetime.now(timezone.utc).isoformat()
+            "Timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         channel.basic_publish(
@@ -58,7 +65,7 @@ def simulate_truck(truck_id, start_city, end_city, duration_minutes=15):
             body=json.dumps(ping)
         )
 
-        time.sleep(20)
+        time.sleep(3)
 
     print(f"🏁 ¡El camión {truck_id} ha llegado a su destino!")
     connection.close()
@@ -67,15 +74,15 @@ if __name__ == "__main__":
     print("🚀 Iniciando el Centro de Despacho Logístico con Rutas Reales...")
 
     routes = [
-        ("434f2223-c6e4-4574-bed4-44ce30a9358f", CITIES["BsAs"], CITIES["MDQ"]),
-        ("7840ba03-69b2-4a98-aa1a-6ed684583385", CITIES["BsAs"], CITIES["Rosario"]),
-        ("f11cd993-9443-413b-b3b4-793fbd5092e0", CITIES["Rosario"], CITIES["Cordoba"])
+        ("b71f3063-4df8-4086-96b5-2b01ccea35f6", "ed0a5c6d-7cf9-4a26-a078-c87a36d6aeb6", CITIES["BsAs"], CITIES["MDQ"], False),
+        ("b86b8d47-8401-46aa-b677-ab1bda6776ed", "6ba63cc1-c20d-47bc-b563-fe15bd44d8b5", CITIES["BsAs"], CITIES["Rosario"], False),
+        ("fbcc244d-1344-4d58-9ac4-67cf0276fc83", "f258e025-3a4c-4c6a-a930-5c5f12ea0282", CITIES["Rosario"], CITIES["Cordoba"], True)
     ]
 
     threads = []
 
-    for truck_id, start, end in routes:
-        t = threading.Thread(target=simulate_truck, args=(truck_id, start, end, 60))
+    for trip_id, truck_id, start, end, deviate in routes:
+        t = threading.Thread(target=simulate_truck, args=(trip_id, truck_id, start, end, deviate))
         threads.append(t)
         t.start()
 

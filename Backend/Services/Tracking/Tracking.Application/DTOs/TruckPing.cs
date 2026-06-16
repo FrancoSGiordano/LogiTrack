@@ -5,7 +5,6 @@
         Guid? TripId,
         double Latitude,
         double Longitude,
-        double Speed,
         DateTime Timestamp
     );
 

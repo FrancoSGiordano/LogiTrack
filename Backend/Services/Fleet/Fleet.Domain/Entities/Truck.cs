@@ -28,7 +28,7 @@ namespace Fleet.Domain.Entities
 
         public void DispatchToRoute()
         {
-            if(Status != TruckStatus.Available)
+            if(Status != TruckStatus.Available && Status != TruckStatus.InBase)
             {
                 throw new TruckUnavailableException(Id, LicensePlate);
             }

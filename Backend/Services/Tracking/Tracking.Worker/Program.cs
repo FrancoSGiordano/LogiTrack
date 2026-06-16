@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
 using StackExchange.Redis;
 using Tracking.Application.Interfaces;
 using Tracking.Application.Services;
+using Tracking.Infrastructure.Caching;
+using Tracking.Infrastructure.Messaging;
 using Tracking.Infrastructure.Persistance;
 using Tracking.Infrastructure.Repositories;
 using Tracking.Worker;
@@ -18,13 +21,27 @@ builder.Services.AddScoped<ITruckPositionService, TruckPositionService>();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["REDIS_CONNECTION"] ?? "localhost:6379";
-    options.InstanceName = "LogiTrack_";
+});
+
+builder.Services.AddSingleton<IConnectionFactory>(sp =>
+{
+    return new ConnectionFactory()
+    {
+        HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost",
+        Port = 5672,
+        UserName = "admin",
+        Password = "admin",
+        VirtualHost = "/"
+    };
 });
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     return ConnectionMultiplexer.Connect(builder.Configuration["REDIS_CONNECTION"] ?? "localhost:6379");
 });
+builder.Services.AddSingleton<ILiveTrackingPublisher, RedisLiveTrackingPublisher>();
+
+builder.Services.AddSingleton<ITripRouteCache, RedisTripRouteCache>();
 
 var host = builder.Build();
 host.Run();

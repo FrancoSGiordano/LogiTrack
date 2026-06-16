@@ -4,14 +4,14 @@ namespace Tracking.Core.Entities
 {
     public class TruckPosition
     {
-        public Guid Id { get; private set; }
-        public Guid TruckId { get; private set; }
-        public Guid? TripId { get; private set; }
-        public double Latitude { get; private set; }
-        public double Longitude { get; private set; }
-        public double Speed { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public bool IsDeviation { get; private set; }
+        public Guid Id { get; set; }
+        public Guid TruckId { get; set; }
+        public Guid? TripId { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public double Speed { get; set; }
+        public DateTime Timestamp { get; set; }
+        public bool IsDeviation { get; set; }
 
         public TruckPosition(Guid truckId, double latitude, double longitude, double speed, DateTime timestamp, Guid? tripId = null)
         {

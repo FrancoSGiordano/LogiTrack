@@ -7,6 +7,7 @@ services:
       - ASPNETCORE_HTTPS_PORTS=8001
       - ASPNETCORE_HTTPS_PORT=5001 
       - ConnectionStrings__FleetDbConnection=Host=fleetdb;Database=fleet_db;Username=admin;Password=admin
+      - REDIS_CONNECTION=redis:6379 
     ports:
       - "5000:8000"
       - "5001:8001"
