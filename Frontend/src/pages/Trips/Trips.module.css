@@ -1,0 +1,206 @@
+/* Variables base para mantener consistencia */
+.container {
+    --bg-color: #111827; /* Tailwind gray-900 */
+    --card-bg: #1f2937;  /* Tailwind gray-800 */
+    --border-color: #374151; /* Tailwind gray-700 */
+    --text-main: #f9fafb; /* Tailwind gray-50 */
+    --text-muted: #9ca3af; /* Tailwind gray-400 */
+    --primary: #3b82f6; /* Tailwind blue-500 */
+    --primary-hover: #2563eb;
+    --success: #10b981;
+    --success-hover: #059669;
+    --danger: #ef4444;
+
+    padding: 1.5rem;
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, sans-serif;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* --- CABECERA --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.headerText {
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.subtitle {
+    margin: 0.25rem 0 0 0;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.createButton {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.createButton:hover {
+    background-color: var(--primary-hover);
+}
+
+.iconMargin {
+    margin-right: 0.5rem;
+}
+
+/* --- TABLA (RESPONSIVE) --- */
+.tableWrapper {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    overflow-x: auto; /* Scroll horizontal en móviles */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Para forzar scroll en pantallas muy chicas */
+}
+
+.table th, .table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.row:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Celdas de la tabla */
+.locationCell, .truckCell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.iconOrigin { color: var(--primary); }
+.iconDest { color: var(--danger); }
+.iconTruck { color: var(--success); }
+
+.locationName {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.unassigned {
+    color: #f59e0b; /* Amber 500 */
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+/* Badges de Estado */
+.statusBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.Pending { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.InProgress { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+.Completed { background-color: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+.timeContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem; /* Separación entre salida y llegada */
+}
+
+.timeRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem; /* Tamaño de letra sutil */
+}
+
+.timeLabel {
+    color: var(--text-muted); /* Gris clarito para no llamar mucho la atención */
+    font-weight: 500;
+}
+
+.timeValue {
+    color: var(--text-main); /* Blanco para la fecha de salida */
+}
+
+.timeValueSuccess {
+    color: var(--success); /* Verde para destacar que ya llegó */
+    font-weight: 600;
+}
+
+/* Botones de acción en tabla */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actionButton {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.actionButton:hover {
+    color: var(--text-main);
+    border-color: var(--text-muted);
+}
+
+.startButton {
+    background-color: var(--success);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.startButton:hover:not(:disabled) { background-color: var(--success-hover); }
+.startButton:disabled {
+    background-color: var(--border-color);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}

@@ -12,8 +12,8 @@ namespace Fleet.Infrastructure.Persistence.Configuration
 
             builder.HasKey(t => t.Id);
 
-            builder.Property(t => t.Origin).HasMaxLength(100).IsRequired();
-            builder.Property(t => t.Destination).HasMaxLength(100).IsRequired();
+            builder.Property(t => t.Origin).HasMaxLength(255).IsRequired();
+            builder.Property(t => t.Destination).HasMaxLength(255).IsRequired();
 
             builder.Property(t => t.OriginLat).IsRequired();
             builder.Property(t => t.OriginLon).IsRequired();

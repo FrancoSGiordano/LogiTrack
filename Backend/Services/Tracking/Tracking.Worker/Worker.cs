@@ -42,7 +42,7 @@ namespace Tracking.Worker
 
                 try
                 {
-                    var ping = JsonSerializer.Deserialize<TruckPing>(message);
+                    var ping = JsonSerializer.Deserialize<TruckPingReceived>(message);
 
                     if(ping != null)
                     {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System.Text.Json;
+using Tracking.Application.DTOs;
 using Tracking.Application.Interfaces;
-using Tracking.Core.Entities;
 
 namespace Tracking.Infrastructure.Messaging
 {
@@ -17,18 +17,18 @@ namespace Tracking.Infrastructure.Messaging
             this.redis = redis;
         }
 
-        public async Task PublishPosition(TruckPosition Position)
+        public async Task PublishPosition(TruckPingResponse ping)
         {
             try
             {
                 var suscriber = redis.GetSubscriber();
-                var messageJson = JsonSerializer.Serialize(Position);
+                var messageJson = JsonSerializer.Serialize(ping);
 
                 await suscriber.PublishAsync(RedisChannel.Literal("live_tracking"), messageJson);
             }
             catch (Exception ex)
             {          
-                logger.LogError(ex, "Falló la publicación en Redis Pub/Sub para el viaje {TripId}", Position.TripId);
+                logger.LogError(ex, "Falló la publicación en Redis Pub/Sub para el viaje {TripId}", ping.TripId);
             }
         }
     }

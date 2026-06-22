@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { Truck, MapPin, Activity, TimerIcon, Focus } from 'lucide-react';
+import { Truck, MapPin, Activity, TimerIcon, Focus, CheckCircle2 } from 'lucide-react';
 import type { TruckPing, Truck as TruckType }  from '../../types';
 import { createTruckIcon } from '../../utils/index'
 import 'leaflet/dist/leaflet.css';
 import styles from './Dashboard.module.css';
-import type { LeafletMouseEvent } from 'leaflet';
-import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 import { fleetService } from '../../services/fleetService';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useTrucks } from '../../hooks/useTrucks';
 
 const AutoPan = ({ position, isTracking }: { position: [number, number], isTracking: boolean }) => {
   const map = useMap();
@@ -27,75 +29,91 @@ const AutoPan = ({ position, isTracking }: { position: [number, number], isTrack
 
 export default function Dashboard() {
 
-    const [truckCatalog, setTruckCatalog] = useState<Record<string, TruckType>>({})
-    const [truckData, setTruckData] = useState<TruckPing | null>(null);
-    const [isTracking, setIsTracking] = useState<boolean>(true);
+    const { data: trucksArray = [], isLoading } = useTrucks()
 
+    const truckCatalog = useMemo(() => {
+        return trucksArray?.reduce((acc: Record<string, TruckType>, truck: TruckType) => {
+            acc[truck.id] = truck;
+            return acc;
+        }, {})
+    }, [trucksArray])
+    
+
+    const [isTracking, setIsTracking] = useState<boolean>(true); 
     const [livePositions, setLivePositions] = useState<Record<string, TruckPing>>({});
     const [selectedTruckId, setSelectedTruckId] = useState<string | null>(null);
     const selectedTruck = selectedTruckId ? livePositions[selectedTruckId] : null;
 
     const [searchTerm, setSearchTerm] = useState<string>("");
 
-    useEffect(() => {
-        const getTrucks = async () => {
-            try{
-                const data = await fleetService.getAll();
-                const trucksMap = data.reduce((acc : any, truck: TruckType) => {
-                    acc[truck.id] = truck;
-                    return acc;
-                }, {});
-                setTruckCatalog(trucksMap);
-                console.log(trucksMap)
-            } catch (error){
-                console.error("Error cargando catálogo:", error);
-            }
-        }
-        getTrucks();
-    }, [])
+    const notifiedTrucks = useRef<Set<string>>(new Set());
+
+    const catalogRef = useRef(truckCatalog);
 
     useEffect(() => {
+        catalogRef.current = truckCatalog;
+    }, [truckCatalog]);
+
+   useEffect(() => {
         const connection = new HubConnectionBuilder()
-            .withUrl("http://localhost:5050/tracking-hub")
+            .withUrl("http://localhost:5050/hubs/tracking")
             .withAutomaticReconnect()
-            .configureLogging(LogLevel.Information)
             .build();
         
-        connection.on("UpdatePosition", (ping: TruckPing) => {
-            setLivePositions(prevPositions => ({
-                ...prevPositions,
-                [ping.truckId]: ping
-            }));
-        });
+        connection.start()
+            .then(() => {
+                console.log("Conectado a SignalR");
 
-        const startConnection = async () => {
-            try {
-                await connection.start();
-                console.log("🟢 ¡Conectado exitosamente a SignalR!");
-            } catch (error) {
-                console.error("🔴 Error al conectar con SignalR:", error);
-            }
-        };
+                connection.on("ReceiveTruckPosition", (truckPing : TruckPing) => {
 
-        startConnection();
+                    const id = truckPing.TruckId
+
+                    if(!id) return;
+
+                    setLivePositions(prevPositions => ({
+                        ...prevPositions,
+                        [id]: truckPing
+                    }));
+
+                    if(truckPing.IsCompleted && !notifiedTrucks.current.has(truckPing.TruckId)){
+                        notifiedTrucks.current.add(id);
+
+                        const truckInfo = catalogRef.current[id]
+                        const licensePlate = truckInfo.licensePlate || id.substring(0, 6);;
+
+                        toast.success(`🏁 ¡El camión ${licensePlate} llegó a su destino!`, {
+                            position: "top-right",
+                            autoClose: 5000,
+                            theme: "dark"
+                        });
+                    }
+                });
+            })
+            .catch (err => console.error("Error conectando a SignalR: ", err));
 
         return () => {
-            connection.stop();
+
+            connection.off("ReceiveTruckPosition");
+
+            if(connection.state === "Connected"){
+                connection.stop()
+            }
         };
-    }, []);
+   }, []);   
 
-    
-    const currentPos : [number, number] = truckData
-        ? [truckData.latitude, truckData.longitude]
-        : [-34.6037, -58.3816];
+    if (isLoading) {
+        return <div className={styles.container}><h2 style={{color: 'white', padding: '2rem'}}>Cargando flota...</h2></div>;
+    }
 
-   const filteredTrucks = Object.values(livePositions).filter(truck => 
-        truck.truckId.toLocaleLowerCase().includes(searchTerm)
-   )
+    const currentPos : [number, number] = [-34.6037, -58.3816];
 
+    const filteredTrucks = Object.values(livePositions).filter(truck => 
+            truckCatalog[truck.TruckId].licensePlate.toLocaleLowerCase().includes(searchTerm)
+    )
 
     return (
         <div className={styles.container}>
+            <ToastContainer/>
             <div className={styles.statsPanel}>
                 <h2 className={styles.panelTitle}>
                     <Activity color='#60a5fa'/> Telemetría en Vivo
@@ -114,25 +132,35 @@ export default function Dashboard() {
                     <>
                         <div className={styles.statBox}>
                             <p className={styles.statLabel}><Truck size={14}/>Unidad Seleccionada</p>
-                            <p className={styles.statValue} style={{ color: 'white' }}>{selectedTruck.truckId}</p>
+                            <p className={styles.statValue} style={{ color: 'white' }}>{truckCatalog[selectedTruck.TruckId].licensePlate} | {truckCatalog[selectedTruck.TruckId].model}</p>
                         </div>
 
                         <div className={styles.statBox}>
                             <p className={styles.statLabel}><MapPin size={14} /> Coordenadas</p>
                             <p className={styles.statValue}>
-                                {selectedTruck.latitude.toFixed(5)}, {selectedTruck.longitude.toFixed(5)}
+                                {selectedTruck.Latitude.toFixed(5)}, {selectedTruck.Longitude.toFixed(5)}
                             </p>
                         </div>
 
                         <div className={styles.statBox}>
                             <p className={styles.statLabel}><TimerIcon size={14}/>Último Ping</p>
                             <p className={styles.statValue}>
-                                {new Date(selectedTruck.timestamp).toLocaleTimeString()}
+                                {new Date(selectedTruck.Timestamp).toLocaleTimeString()}
                             </p>
                         </div>
                         <div className={styles.connectionStatus}>
-                            <div className={styles.pingDot}></div>
-                            Recibiendo señal
+                            {selectedTruck.IsCompleted ? (
+                                <>
+                                    <CheckCircle2 size={14} color="#10b981" />
+                                    <span className={styles.tripCompleteText}>Viaje Finalizado</span>
+                                </>
+                            ) : (
+                                <>
+                                    <div className={styles.pingDot}></div>
+                                    Recibiendo señal
+                                </>
+                            )}
+                            
                         </div>
                     </>
                 )}
@@ -144,7 +172,7 @@ export default function Dashboard() {
 
                     <input 
                         type="text" 
-                        placeholder="Buscar unidad por ID..." 
+                        placeholder="Buscar unidad por Patente..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className={styles.searchInput}
@@ -152,15 +180,20 @@ export default function Dashboard() {
 
                     <div className={styles.truckListWrapper}>
                         {filteredTrucks.map(truck => {
-                            const isCurrentlySelected = selectedTruckId === truck.truckId
-                            const truckInfo = truckCatalog[truck.truckId] || { model: "Desconocido", plate: "---" };
-                            const minutesSinceLastPing = (Date.now() - new Date(truck.timestamp).getTime()) / 60000;
+                            const isCurrentlySelected = selectedTruckId === truck.TruckId;
+                            const truckInfo = truckCatalog[truck.TruckId];
+                            const minutesSinceLastPing = (Date.now() - new Date(truck.Timestamp).getTime()) / 60000;
 
                             let statusClass = styles.dotActive;
                             let statusText = "Activo";
                             let statusTextColor = "#10b981";
 
-                            if (minutesSinceLastPing > 5) {
+                            if(truck.IsCompleted){
+                                statusClass = styles.dotActive; 
+                                statusText = "Destino";
+                                statusTextColor = "#10b981";
+                            }
+                            else if (minutesSinceLastPing > 5) {
                                 statusClass = styles.dotOffline;
                                 statusText = "Sin señal";
                                 statusTextColor = "#ef4444";
@@ -172,13 +205,13 @@ export default function Dashboard() {
 
                             return (
                                 <button
-                                    key={truck.truckId}
-                                    onClick={() => setSelectedTruckId(truck.truckId)}
+                                    key={truck.TruckId}
+                                    onClick={() => setSelectedTruckId(truck.TruckId)}
                                     style={{ flexDirection: 'column', alignItems: 'flex-start'}}
                                     className={`${styles.truckListItem} ${isCurrentlySelected ? styles.truckListItemSelected : ''}`}
                                 >
                                     <div className={styles.truckItemHeader}>
-                                        <span className={styles.truckItemTitle}>{truck.truckId.substring(0, 8)}...</span>
+                                        <span className={styles.truckItemTitle}>{truckInfo.licensePlate}</span>
                                         
                                         <div className={styles.statusIndicator} style={{ color: statusTextColor }}>
                                             <div className={`${styles.statusDot} ${statusClass}`}></div>
@@ -186,9 +219,9 @@ export default function Dashboard() {
                                         </div>
                                     </div>
                                     <div className={styles.truckItemDetails}>
-                                        <span>Ult: {new Date(truck.timestamp).toLocaleTimeString()}</span>
+                                        <span>Ult: {new Date(truck.Timestamp).toLocaleTimeString()}</span>
                                         <span className={isCurrentlySelected ? styles.truckListStatusSelected : styles.truckListStatus}>
-                                            {isCurrentlySelected ? 'En foco' : 'Ruta'}
+                                            {truck.IsCompleted ? 'Completado' : (isCurrentlySelected ? 'En foco' : 'Ruta')}
                                         </span>
                                     </div>
                                 </button>
@@ -212,27 +245,76 @@ export default function Dashboard() {
                     />
 
                     {Object.values(livePositions).map((truck) => {
-                        const truckInfo = truckCatalog[truck.truckId] || { model: "Desconocido", plate: "---" };
-                        const isSelected = selectedTruckId === truck.truckId;
-                        const truckPos: [number, number] = [truck.latitude, truck.longitude];
+                        const truckInfo = truckCatalog[truck.TruckId] || { model: "Desconocido", plate: "---" };
+                        const isSelected = selectedTruckId === truck.TruckId;
+                        const truckPos: [number, number] = [truck.Latitude, truck.Longitude];
 
                         return (
                             <Marker
-                                key={truck.truckId}
+                                key={truck.TruckId}
                                 position={truckPos}
-                                icon={createTruckIcon(isSelected ? "#10b981" : "#3b82f6")}
+                                icon={createTruckIcon(isSelected ? "#10b981" : (truck.IsCompleted ? "#9ca3af" : "#3b82f6"))}
                                 eventHandlers={{
                                     click: () => {
-                                        setSelectedTruckId(truck.truckId)
+                                        setSelectedTruckId(truck.TruckId)
                                     },
                                     mouseover: (e: any) => e.target.openPopup(),
                                     mouseout: (e: any) => e.target.closePopup(),
                                 }}
                             >
                                 <Popup>
-                                    <strong>{truckInfo.model}</strong><br />
-                                    <strong>{truckInfo.licensePlate}</strong><br />
-                                    LAT: {truck.latitude.toFixed(4)} | LON: {truck.longitude.toFixed(4)}
+                                    <div className={styles.popupContainer}>
+                                        
+                                        {/* Encabezado: Icono + Modelo */}
+                                        <div className={styles.popupHeader}>
+                                            <Truck size={18} color={truck.IsDeviated ? "#ef4444" : "#3b82f6"} />
+                                            <div className={styles.popupTitleGroup}>
+                                                <h4 className={styles.popupModel}>
+                                                    {truckInfo.model || "Camión Scania"}
+                                                </h4>
+                                                <span className={styles.popupPlate}>
+                                                    {truckInfo.licensePlate || truck.TruckId.substring(0, 8)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Cuerpo: Datos de Telemetría */}
+                                        <div className={styles.popupBody}>
+                                            <div className={styles.popupRow}>
+                                                <span>Velocidad:</span>
+                                                <span className={styles.speedBadge}>
+                                                    ⚡ {Math.round(truck.Speed)} km/h
+                                                </span>
+                                            </div>
+                                            
+                                            <div className={styles.popupRow}>
+                                                <span>Último reporte:</span>
+                                                <span className={styles.timestamp}>
+                                                    {new Date(truck.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Alerta de Desvío Dinámica */}
+                                        <div className={styles.popupFooter}>
+                                            {truck.IsCompleted ? (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontWeight: 'bold', fontSize: '12px' }}>
+                                                    <CheckCircle2 size={16} />
+                                                    <span>Viaje Finalizado Exitosamente</span>
+                                                </div>
+                                            ) : truck.IsDeviated ? (
+                                                <div className={styles.alertDeviated}>
+                                                    <span>⚠️</span>
+                                                    <span>ALERTA: Fuera de Ruta</span>
+                                                </div>
+                                            ) : (
+                                                <div className={styles.alertNormal}>
+                                                    <div className={styles.dotGreen}></div>
+                                                    <span>Ruta Correcta</span>
+                                                </div>
+                                            )}                                     
+                                        </div>
+                                    </div>
                                 </Popup>
 
                             </Marker>
@@ -241,7 +323,7 @@ export default function Dashboard() {
 
                     {selectedTruck && (
                         <AutoPan
-                            position={[selectedTruck.latitude, selectedTruck.longitude]} 
+                            position={[selectedTruck.Latitude, selectedTruck.Longitude]} 
                             isTracking={isTracking}
                         />
                     )}

@@ -33,8 +33,9 @@ namespace Tracking.API
 
                     if (root.TryGetProperty("TripId", out var tripIdProperty) && tripIdProperty.GetGuid() != Guid.Empty)
                     {
-                        string tripId = tripIdProperty.GetGuid().ToString();
-                        await hub.Clients.Group($"trip_{tripId}").SendAsync("ReceiveTruckPosition", jsonString, stoppingToken);
+                        var payload = JsonSerializer.Deserialize<object>(jsonString);
+                       
+                        await hub.Clients.All.SendAsync("ReceiveTruckPosition", payload, stoppingToken);
                     }
 
                 }

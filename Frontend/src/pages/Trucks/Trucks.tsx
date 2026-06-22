@@ -20,12 +20,12 @@ export default function Trucks() {
 
     const { data: trucks, isLoading } = useQuery({
         queryKey: ["trucks"],
-        queryFn: fleetService.getAll
+        queryFn: fleetService.getTrucks
     })
 
     const createMutation = useMutation({
         mutationFn: (data: {payload : TruckDetailsPayload}) => 
-            fleetService.create(data.payload),
+            fleetService.createTruck(data.payload),
 
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['trucks']})
@@ -38,7 +38,7 @@ export default function Trucks() {
 
     const updateMutation = useMutation({
         mutationFn: (data: {id: string, payload: TruckDetailsPayload}) =>
-            fleetService.updateDetails(data.id, data.payload),
+            fleetService.updateTruckDetails(data.id, data.payload),
 
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['trucks']})
@@ -51,7 +51,7 @@ export default function Trucks() {
 
     const statusMutation = useMutation({
         mutationFn: (data: {id: string, payload: string}) => 
-            fleetService.updateStatus(data.id, data.payload),
+            fleetService.updateTruckStatus(data.id, data.payload),
 
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['trucks']})

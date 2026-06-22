@@ -1,4 +1,6 @@
 ﻿using BuildingBlocks.CQRS;
+using BuildingBlocks.Interfaces;
+using BuildingBlocks.Messaging.Events;
 using Fleet.Application.DTOs.Trip;
 using Fleet.Application.Exceptions;
 using Fleet.Application.Interfaces;
@@ -10,11 +12,12 @@ using System.Text.Json;
 namespace Fleet.Application.Trips.Commands.UpdateTripStatus
 {
     public class UpdateTripStatusCommandHandler
-        (ITripRepository repository, IRoutingService routingService, IDistributedCache cache)
+        (ITripRepository repository, IRoutingService routingService, IDistributedCache cache, IEventBus bus)
         : ICommandHandler<UpdateTripStatusCommand, TripResponse>
     {
         public async Task<TripResponse> Handle(UpdateTripStatusCommand command, CancellationToken cancellationToken)
         {
+
             var trip = await repository.GetTripWithTruckByIdAsync(command.Id);
 
             if (trip == null)
@@ -22,14 +25,29 @@ namespace Fleet.Application.Trips.Commands.UpdateTripStatus
                 throw new TripNotFoundException(command.Id);
             }
 
+
             switch (command.Status.ToUpper())
             {
                 case "INPROGRESS":
+
+                    if(trip.TruckId == null)
+                    {
+                        throw new TripHasNotTruckAssignedException(trip.Id);
+                    }
+
                     trip.StartTrip();
                     await SaveRouteOnRedis(trip);
+                    await bus.PublishAsync(new TripStartedEvent(
+                        trip.Id,
+                        trip.TruckId.Value,
+                        trip.OriginLat,
+                        trip.OriginLon,
+                        trip.DestinationLat,
+                        trip.DestinationLon
+                        ));
                     break;
                 case "COMPLETED":
-                    trip.CompleteTrip();
+                    trip.CompleteTrip(command.finishLat, command.finishLon);
                     await RemoveRouteFromRedis(trip.Id);
                     break;
                 default:

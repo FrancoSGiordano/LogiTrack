@@ -15,7 +15,7 @@ namespace Tracking.Infrastructure.Caching
             this.cache = cache;
         }
 
-        public async Task<TruckPing> GetLastPing(Guid? TripId)
+        public async Task<TruckPingResponse> GetLastPing(Guid? TripId)
         {
             var cacheKey = $"last_ping:{TripId}";
             var json = await cache.GetStringAsync(cacheKey);
@@ -25,7 +25,7 @@ namespace Tracking.Infrastructure.Caching
                 return null;
             }
 
-            return JsonSerializer.Deserialize<TruckPing>(json);
+            return JsonSerializer.Deserialize<TruckPingResponse>(json);
         }
 
         public async Task<List<Coordinate>> GetRoute(Guid? TripId)
@@ -41,7 +41,7 @@ namespace Tracking.Infrastructure.Caching
             return JsonSerializer.Deserialize<List<Coordinate>>(json);
         }
 
-        public async Task SetLastPing(Guid? TripId, TruckPing Ping)
+        public async Task SetLastPing(Guid? TripId, TruckPingResponse Ping)
         {
             var cacheKey = $"last_ping:{TripId}";
             var json = JsonSerializer.Serialize(Ping);

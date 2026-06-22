@@ -107,7 +107,7 @@ export default function TruckModal({ isOpen, isEditing, initialData, onClose, on
               {isEditing ? 'Editar Camión' : 'Nuevo Camión'}
             </h2>
             
-            <form onSubmit={handleSubmit} noValidate>
+            <form onSubmit={handleSubmit}>
               
               <div className={styles.formGroup}>
                 <label>Modelo del Vehículo</label>

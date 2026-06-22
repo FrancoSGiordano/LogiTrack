@@ -1,0 +1,174 @@
+.modalOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 1rem;
+}
+
+.modal {
+    background-color: var(--card-bg);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* Para que no se salga de la pantalla */
+    animation: slideIn 0.3s ease-out;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.closeModal {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.closeModal:hover { color: var(--text-main); }
+
+/* --- FORMULARIO Y BUSCADOR --- */
+.form {
+    padding: 1.25rem;
+    overflow-y: auto; /* Scroll interno si el form es muy largo */
+}
+
+.formSection {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.formSection h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.searchContainer {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.inputFull, .selectFull {
+    flex: 1;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    color: var(--text-main);
+    font-size: 0.875rem;
+}
+
+.inputFull:focus, .selectFull:focus, .inputHalf:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.searchButton {
+    background-color: var(--border-color);
+    color: var(--text-main);
+    border: none;
+    padding: 0 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.searchButton:hover:not(:disabled) { background-color: var(--primary); }
+
+.searchResults {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.5rem 0;
+    background-color: var(--bg-color);
+    border: 1px solid var(--primary);
+    border-radius: 0.25rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.searchResults li {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.searchResults li:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.searchingCoords {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 6px;
+    display: block;
+    animation: slideIn 0.2s ease-out;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.cancelButton {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.submitButton {
+    background-color: var(--primary);
+    border: none;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 6px;
+  display: block;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

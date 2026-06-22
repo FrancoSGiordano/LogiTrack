@@ -1,6 +1,8 @@
+using BuildingBlocks.Extensions;
 using Fleet.Application;
 using Fleet.Application.Interfaces;
 using Fleet.Infrastructure;
+using Fleet.Infrastructure.Messaging.Consumers;
 using Fleet.Infrastructure.Services;
 using Microsoft.OpenApi;
 using System.Reflection;
@@ -36,6 +38,10 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHttpClient<IRoutingService, OsrmRoutingService>();
 
+builder.Services.AddCustomMassTransit(
+    typeof(TripCompletedEventConsumer).Assembly,
+    typeof(RouteMissingInCacheEventConsumer).Assembly 
+);
 
 builder.Services.AddCors(options =>
 {
@@ -48,6 +54,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -58,9 +66,12 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
 app.UseCors("AllowFrontend");
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 

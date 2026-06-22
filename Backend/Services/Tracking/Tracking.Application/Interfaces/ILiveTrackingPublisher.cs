@@ -1,9 +1,9 @@
-﻿using Tracking.Core.Entities;
+﻿using Tracking.Application.DTOs;
 
 namespace Tracking.Application.Interfaces
 {
     public interface ILiveTrackingPublisher
     {
-        Task PublishPosition(TruckPosition Position);
+        Task PublishPosition(TruckPingResponse ping);
     }
 }

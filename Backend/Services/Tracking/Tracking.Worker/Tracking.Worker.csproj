@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\Fleet\Fleet.Application\Fleet.Application.csproj" />
     <ProjectReference Include="..\Tracking.Infrastructure\Tracking.Infrastructure.csproj" />
   </ItemGroup>

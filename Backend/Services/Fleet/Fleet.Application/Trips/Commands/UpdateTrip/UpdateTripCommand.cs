@@ -6,7 +6,7 @@ namespace Fleet.Application.Trips.Commands.UpdateTrip
     public record UpdateTripCommand
     (
         Guid Id,
-        Guid TruckId,
+        Guid? TruckId,
         string Origin,
         string Destination,
         double OriginLat,

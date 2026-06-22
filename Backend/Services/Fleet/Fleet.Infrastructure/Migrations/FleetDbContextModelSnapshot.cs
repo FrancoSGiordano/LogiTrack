@@ -36,8 +36,8 @@ namespace Fleet.Infrastructure.Migrations
 
                     b.Property<string>("Destination")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<double>("DestinationLat")
                         .HasColumnType("double precision");
@@ -45,10 +45,16 @@ namespace Fleet.Infrastructure.Migrations
                     b.Property<double>("DestinationLon")
                         .HasColumnType("double precision");
 
+                    b.Property<double?>("FinishLat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("FinishLon")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Origin")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<double>("OriginLat")
                         .HasColumnType("double precision");
@@ -63,7 +69,7 @@ namespace Fleet.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("TruckId")
+                    b.Property<Guid?>("TruckId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -111,9 +117,7 @@ namespace Fleet.Infrastructure.Migrations
                 {
                     b.HasOne("Fleet.Domain.Entities.Truck", "Truck")
                         .WithMany()
-                        .HasForeignKey("TruckId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TruckId");
 
                     b.Navigation("Truck");
                 });

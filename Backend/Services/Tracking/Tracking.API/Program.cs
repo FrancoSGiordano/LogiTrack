@@ -58,7 +58,7 @@ app.MapGet("/api/tracking/{truckId}/last-position", async (Guid truckId, IDistri
 
     if (!string.IsNullOrEmpty(cachedData))
     {
-        var ping = JsonSerializer.Deserialize<TruckPing>(cachedData);
+        var ping = JsonSerializer.Deserialize<TruckPingReceived>(cachedData);
         return Results.Ok(ping);
     }
     

@@ -4,6 +4,6 @@ namespace Tracking.Application.Interfaces
 {
     public interface ITruckPositionService
     {
-        Task AddTruckPosition(TruckPing TruckPing);
+        Task AddTruckPosition(TruckPingReceived TruckPing);
     }
 }

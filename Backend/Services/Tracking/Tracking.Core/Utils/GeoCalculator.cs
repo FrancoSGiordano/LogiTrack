@@ -21,7 +21,11 @@
 
         public static bool IsDeviated(double currentLat, double currentLon, List<Coordinate> route, double toleranceMeters)
         {
-            if (route == null || route.Count < 2) return false;
+            if (route == null || route.Count < 2) 
+            {
+                Console.WriteLine("❌ [GEO-CALCULATOR] ABORTANDO: La ruta tiene menos de 2 puntos. Retornando FALSE.");
+                return false;
+            } 
 
             double minDistanceMeters = double.MaxValue;
 
@@ -32,6 +36,12 @@
                     route[i].Lat, route[i].Lon,
                     route[i + 1].Lat, route[i + 1].Lon
                     );
+
+                if (distance <= toleranceMeters)
+                {
+                    Console.WriteLine($"[BINGO] Cortó el bucle. Distancia calculada: {distance}m");
+                    Console.WriteLine($"[DATOS] Ping: ({currentLat}, {currentLon}) | Segmento: ({route[i].Lat}, {route[i].Lon}) a ({route[i + 1].Lat}, {route[i + 1].Lon})");
+                }
 
                 if (distance < minDistanceMeters)
                 {
@@ -45,6 +55,15 @@
             }
 
             return minDistanceMeters > toleranceMeters;
+        }
+
+        public static bool HasArrived(double currentLat, double currentLon, double destLat, double destLon, double radiusMeters = 500)
+        {
+            double distanceKm = CalculateHaversineDistanceKm(currentLat, currentLon, destLat, destLon);
+
+            double distanceMeters = distanceKm * 1000;
+
+            return distanceMeters <= radiusMeters;
         }
 
         private static double CalculateHaversineDistanceKm(double latitude1, double longitude1, double latitude2, double longitude2)

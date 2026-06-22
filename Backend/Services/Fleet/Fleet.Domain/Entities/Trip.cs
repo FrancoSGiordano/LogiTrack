@@ -6,7 +6,7 @@ namespace Fleet.Domain.Entities
     public class Trip
     {
         public Guid Id { get; set; }
-        public Guid TruckId { get; set; }
+        public Guid? TruckId { get; set; }
         public Truck Truck { get; set; }
         public string Origin { get; set; }
         public string Destination { get; set; }
@@ -14,6 +14,8 @@ namespace Fleet.Domain.Entities
         public double OriginLon { get; set; }
         public double DestinationLat { get; set; }
         public double DestinationLon { get; set; }
+        public double? FinishLat { get; set; }
+        public double? FinishLon { get; set; }
         public TripStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? StartedAt { get; set; }
@@ -21,9 +23,9 @@ namespace Fleet.Domain.Entities
 
         public void StartTrip()
         {
-            if(Status == TripStatus.Compeleted)
+            if(Status == TripStatus.Completed)
             {
-                throw new TripAlreadyCompletedException(Id, TruckId);
+                throw new TripAlreadyCompletedException(Id, TruckId.Value);
             }
 
             Status = TripStatus.InProgress;
@@ -31,10 +33,12 @@ namespace Fleet.Domain.Entities
             Truck.DispatchToRoute();
         }
 
-        public void CompleteTrip()
+        public void CompleteTrip(double? finishLat, double? finishLon)
         {
-            Status = TripStatus.Compeleted;
+            Status = TripStatus.Completed;
             CompletedAt = DateTime.UtcNow;
+            FinishLat = finishLat;
+            FinishLon = finishLon;
             Truck.SetAvailable();
         }
     }

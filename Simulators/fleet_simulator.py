@@ -76,7 +76,7 @@ if __name__ == "__main__":
     routes = [
         ("b71f3063-4df8-4086-96b5-2b01ccea35f6", "ed0a5c6d-7cf9-4a26-a078-c87a36d6aeb6", CITIES["BsAs"], CITIES["MDQ"], False),
         ("b86b8d47-8401-46aa-b677-ab1bda6776ed", "6ba63cc1-c20d-47bc-b563-fe15bd44d8b5", CITIES["BsAs"], CITIES["Rosario"], False),
-        ("fbcc244d-1344-4d58-9ac4-67cf0276fc83", "f258e025-3a4c-4c6a-a930-5c5f12ea0282", CITIES["Rosario"], CITIES["Cordoba"], True)
+        ("fbcc244d-1344-4d58-9ac4-67cf0276fc83", "f258e025-3a4c-4c6a-a930-5c5f12ea0282", CITIES["Rosario"], CITIES["Cordoba"], False)
     ]
 
     threads = []

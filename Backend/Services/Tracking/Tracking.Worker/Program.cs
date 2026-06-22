@@ -1,3 +1,6 @@
+using BuildingBlocks.Extensions;
+using BuildingBlocks.Interfaces;
+using BuildingBlocks.Messaging;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 using StackExchange.Redis;
@@ -22,6 +25,10 @@ builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["REDIS_CONNECTION"] ?? "localhost:6379";
 });
+
+builder.Services.AddCustomMassTransit();
+
+builder.Services.AddScoped<IEventBus, MassTransitEventBus>();
 
 builder.Services.AddSingleton<IConnectionFactory>(sp =>
 {

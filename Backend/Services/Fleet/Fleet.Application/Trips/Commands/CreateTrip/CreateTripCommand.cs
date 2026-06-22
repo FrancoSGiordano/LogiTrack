@@ -4,7 +4,7 @@ using Fleet.Application.DTOs.Trip;
 namespace Fleet.Application.Trips.Commands.CreateTrip
 {
     public record CreateTripCommand(
-        Guid TruckId,
+        Guid? TruckId,
         string Origin,
         string Destination,
         double OriginLat,

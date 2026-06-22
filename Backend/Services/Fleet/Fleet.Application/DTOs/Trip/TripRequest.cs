@@ -2,7 +2,7 @@
 {
     public record TripRequest
     {
-        public Guid TruckId { get; init; }
+        public Guid? TruckId { get; init; }
         public string Origin { get; init; }
         public string Destination { get; init; }
         public double OriginLat { get; init; }

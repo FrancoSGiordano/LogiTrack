@@ -1,9 +1,10 @@
-﻿namespace Fleet.Domain.Enums
+﻿
+namespace Fleet.Domain.Enums
 {
     public enum TripStatus
     {
         Pending,
         InProgress,
-        Compeleted
+        Completed
     }
 }
